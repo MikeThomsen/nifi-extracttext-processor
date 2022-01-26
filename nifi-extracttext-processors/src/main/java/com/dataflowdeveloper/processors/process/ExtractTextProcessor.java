@@ -223,7 +223,6 @@ public class ExtractTextProcessor extends AbstractProcessor {
 				flowFile = session.putAllAttributes(flowFile, mimeAttrs);
 				session.transfer(flowFile, REL_SUCCESS);
 			}
-			session.commit();
 		} catch (final Throwable t) {
 			getLogger().error("Unable to process ExtractTextProcessor file " + t.getLocalizedMessage());
 			getLogger().error("{} failed to process due to {}; rolling back session", new Object[] { this, t });
