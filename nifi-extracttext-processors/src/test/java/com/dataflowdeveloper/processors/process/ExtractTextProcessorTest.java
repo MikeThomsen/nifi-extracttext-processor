@@ -16,9 +16,12 @@
  */
 package com.dataflowdeveloper.processors.process;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import java.io.File;
+import org.apache.nifi.util.MockFlowFile;
+import org.apache.nifi.util.TestRunner;
+import org.apache.nifi.util.TestRunners;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -26,20 +29,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.nifi.components.PropertyDescriptor;
-import org.apache.nifi.processor.util.StandardValidators;
-import org.apache.nifi.util.MockFlowFile;
-import org.apache.nifi.util.TestRunner;
-import org.apache.nifi.util.TestRunners;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class ExtractTextProcessorTest {
 
 	private TestRunner testRunner;
  
-	@Before
+	@BeforeEach
 	public void init() {
 		testRunner = TestRunners.newTestRunner(ExtractTextProcessor.class);
 	}
@@ -49,7 +47,7 @@ public class ExtractTextProcessorTest {
 		
 		try {
 			final String filename = "simple.pdf";
-			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream(new File("src/test/resources/" + filename)));
+			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream("src/test/resources/" + filename));
 			Map<String, String> attrs = new HashMap<String, String>() {{ put("filename", filename); }};
 			flowFile.putAttributes(attrs);
 		} catch (FileNotFoundException e) {
@@ -79,7 +77,7 @@ public class ExtractTextProcessorTest {
 		
 		try {
 			final String filename = "simple.doc";
-			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream(new File("src/test/resources/" + filename)));
+			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream("src/test/resources/" + filename));
 			Map<String, String> attrs = new HashMap<String, String>() {{ put("filename", filename); }};
 			flowFile.putAttributes(attrs);
 		} catch (FileNotFoundException e) {
@@ -109,7 +107,7 @@ public class ExtractTextProcessorTest {
 		
 		try {
 			final String filename = "simple.docx";
-			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream(new File("src/test/resources/" + filename)));
+			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream("src/test/resources/" + filename));
 			Map<String, String> attrs = new HashMap<String, String>() {{ put("filename", filename); }};
 			flowFile.putAttributes(attrs);
 		} catch (FileNotFoundException e) {
@@ -139,7 +137,7 @@ public class ExtractTextProcessorTest {
 		
 		try {
 			final String filename = "simple.pdf";
-			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream(new File("src/test/resources/" + filename)));
+			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream("src/test/resources/" + filename));
 			Map<String, String> attrs = new HashMap<String, String>() {{ put("filename", filename); }};
 			flowFile.putAttributes(attrs);
 		} catch (FileNotFoundException e) {
@@ -160,44 +158,11 @@ public class ExtractTextProcessorTest {
 	}
 	
 	@Test
-	public void when_running_processor_mime_type_should_be_discovered_for_pdf_input_html() {
-		
-		try {
-			final String filename = "simple.pdf";
-			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream(new File("src/test/resources/" + filename)));
-			Map<String, String> attrs = new HashMap<String, String>() {{ put("filename", filename);  }};
-
-			testRunner.setProperty(ExtractTextProcessor.FIELD_HTML_OUTPUT, ExtractTextProcessor.HTML_FORMAT);
-
-			flowFile.putAttributes(attrs);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		testRunner.assertValid();
-		testRunner.run();
-		
-		testRunner.assertAllFlowFilesTransferred(ExtractTextProcessor.REL_SUCCESS);
-		List<MockFlowFile> successFiles = testRunner.getFlowFilesForRelationship(ExtractTextProcessor.REL_SUCCESS);
-		for (MockFlowFile mockFile : successFiles) {
-			
-//			 for ( String attribute : mockFile.getAttributes().keySet() ) {
-//				 System.out.println("Attribute:" + attribute + "=" + mockFile.getAttribute(attribute));
-//			 }
-			 			
-			mockFile.assertAttributeExists("mime.type");
-			mockFile.assertAttributeEquals("mime.type", "text/html");
-			mockFile.assertAttributeExists("orig.mime.type");
-			mockFile.assertAttributeEquals("orig.mime.type", "application/pdf");
-		}
-	}
-	
-	@Test
 	public void when_running_processor_mime_type_should_be_discovered_for_doc_input() {
 		
 		try {
 			final String filename = "simple.doc";
-			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream(new File("src/test/resources/" + filename)));
+			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream("src/test/resources/" + filename));
 			Map<String, String> attrs = new HashMap<String, String>() {{ put("filename", filename); }};
 			flowFile.putAttributes(attrs);
 		} catch (FileNotFoundException e) {
@@ -222,7 +187,7 @@ public class ExtractTextProcessorTest {
 		
 		try {
 			final String filename = "simple.docx";
-			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream(new File("src/test/resources/" + filename)));
+			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream("src/test/resources/" + filename));
 			Map<String, String> attrs = new HashMap<String, String>() {{ put("filename", filename); }};
 			flowFile.putAttributes(attrs);
 		} catch (FileNotFoundException e) {
@@ -247,7 +212,7 @@ public class ExtractTextProcessorTest {
 		
 		try {
 			final String filename = "big.pdf";
-			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream(new File("src/test/resources/" + filename)));
+			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream("src/test/resources/" + filename));
 			Map<String, String> attrs = new HashMap<String, String>() {{ put("filename", filename); }};
 			flowFile.putAttributes(attrs);
 		} catch (FileNotFoundException e) {
@@ -263,7 +228,7 @@ public class ExtractTextProcessorTest {
 			try {
 				String result = new String(mockFile.toByteArray(), "UTF-8");
 				assertTrue(result.length() > 100);
-				System.out.println(Integer.toString(result.length()));
+				System.out.println(result.length());
 				System.out.println("FILE:" + result);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
@@ -276,7 +241,7 @@ public class ExtractTextProcessorTest {
 		
 		try {
 			final String filename = "simple.pdf";
-			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream(new File("src/test/resources/" + filename)));
+			MockFlowFile flowFile = testRunner.enqueue(new FileInputStream("src/test/resources/" + filename));
 			Map<String, String> attrs = new HashMap<String, String>() {{ put("filename", filename); }};
 			flowFile.putAttributes(attrs);
 		} catch (FileNotFoundException e) {
@@ -299,5 +264,4 @@ public class ExtractTextProcessorTest {
 			}
 		}
 	}
-	
 }
