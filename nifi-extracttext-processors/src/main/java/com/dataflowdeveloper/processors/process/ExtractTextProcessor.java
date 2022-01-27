@@ -45,6 +45,7 @@ import org.apache.nifi.annotation.documentation.SeeAlso;
 import org.apache.nifi.annotation.documentation.Tags;
 import org.apache.nifi.annotation.lifecycle.OnScheduled;
 import org.apache.nifi.components.PropertyDescriptor;
+import org.apache.nifi.expression.ExpressionLanguageScope;
 import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.processor.AbstractProcessor;
 import org.apache.nifi.processor.ProcessContext;
@@ -83,7 +84,7 @@ public class ExtractTextProcessor extends AbstractProcessor {
 			.description(
 					"The maximum length of text to retrieve. This is used to limit memory usage for dealing with large files. Specify -1 for unlimited length.")
 			.required(false).defaultValue("-1").addValidator(StandardValidators.INTEGER_VALIDATOR)
-			.expressionLanguageSupported(false).build();
+			.expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES).build();
 
 	public static final PropertyDescriptor HTML_OUTPUT = new PropertyDescriptor.Builder()
 			.name(FIELD_HTML_OUTPUT)
@@ -91,7 +92,7 @@ public class ExtractTextProcessor extends AbstractProcessor {
 			.description("Send html for HTML output or text for Text output")
 			.required(false).defaultValue(TEXT_FORMAT)
 			.addValidator(StandardValidators.NON_BLANK_VALIDATOR)
-			.expressionLanguageSupported(false).build();
+			.expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES).build();
 
 	public static final Relationship REL_SUCCESS = new Relationship.Builder().name(FIELD_SUCCESS)
 			.description("Successfully extract content.").build();
@@ -137,8 +138,8 @@ public class ExtractTextProcessor extends AbstractProcessor {
 			flowFile = session.create();
 		}
 
-		final int maxTextLength = context.getProperty(MAX_TEXT_LENGTH).asInteger();
-		final String outputMode = context.getProperty(HTML_OUTPUT).getValue();
+		final int maxTextLength = context.getProperty(MAX_TEXT_LENGTH).evaluateAttributeExpressions(flowFile).asInteger();
+		final String outputMode = context.getProperty(HTML_OUTPUT).evaluateAttributeExpressions(flowFile).getValue();
 		final String filename = flowFile.getAttribute("filename");
 		
 		try {
